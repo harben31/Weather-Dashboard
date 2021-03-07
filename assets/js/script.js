@@ -1,4 +1,5 @@
 const citySearch = document.querySelector("#citySearch");
+
 const searchBtn = document.querySelector("#buttonSearch");
 const searchSidebar = document.querySelector("#searchSidebar");
 const citiesUl = document.querySelector("#cities");
@@ -14,7 +15,7 @@ const fiveDayWrap = document.querySelector("#fiveDayWrap");
 
 let cityLi;
 
-// let appendCount = 0;
+let appendCount = 0;
 
 let city5DayDiv;
 let city5DayPDate;
@@ -22,13 +23,37 @@ let city5DayPSun;
 let city5DayPTemp;
 let city5DayPHumid;
 
+const testString = "this is a  sentance"
+console.log(testString.replace(" ", "+"));
+
 const kToF = function(k){
     return Math.round((k-273.15) * 9/5 +32);
 };
 
-//-----change the citySearch value so they can also or just be from the cityLis---
+const render5Day = function(){
+for (let i = 0; i < 5; i++) {
+        city5DayDiv = document.createElement("div");
+        city5DayPDate = document.createElement("p");
+        city5DayPSun = document.createElement("p");
+        city5DayPTemp = document.createElement("p");
+        city5DayPHumid = document.createElement("p");
+
+        city5DayDiv.setAttribute("class", "fiveDayCard");
+        city5DayPDate.setAttribute("class", "fiveDayDate");
+        city5DayPSun.setAttribute("class", "fiveDaySun");
+        city5DayPTemp.setAttribute("class", "fiveDayTemp");
+        city5DayPHumid.setAttribute("class", "fiveDayHumid");
+
+        fiveDayWrap.appendChild(city5DayDiv);
+        city5DayDiv.appendChild(city5DayPDate);
+        city5DayDiv.appendChild(city5DayPSun);
+        city5DayDiv.appendChild(city5DayPTemp);
+        city5DayDiv.appendChild(city5DayPHumid);
+    }
+                    
+}
+
 const cityWeatherApi = function(cityTrigger){
-    // appendCount++;
     //need to replace '_' spaces with +
     const cityBasicWeatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + cityTrigger +"&appid=508f9f1ec1873e44a9f17ab4f5c43087";
     
@@ -45,6 +70,7 @@ const cityWeatherApi = function(cityTrigger){
                 citySearch.value = "";
                 return
             }
+            //----------TODO localStorage---------------
             citySearch.value = "";
             // console.log(data)
             const newLi = document.createElement("li");
@@ -52,16 +78,6 @@ const cityWeatherApi = function(cityTrigger){
             cityLi = document.querySelector(".cityLi");
             newLi.textContent = data.name;
             citiesUl.appendChild(newLi);
-            
-            // for (let j = 0; j < cityLi.length; j++) {
-            //     console.log(j)
-            //     if (cityTrigger!==cityLi[j].textContent.toLowerCase()){
-            //         console.log("if")
-            //     } else {
-            //         citiesUl.appendChild(newLi);
-            //         console.log("else")
-            //     }
-            // } 
 
             const msToMph = function(w){
                 return Math.round(w * 2.23694);
@@ -104,8 +120,12 @@ const cityWeatherApi = function(cityTrigger){
                     // console.log(cityUv);
                     selectedCityUv.textContent = "UV Index: " + cityUv;
 
+
+                    //this is not working correctly
+                    //green is not rendering a
+                    //once it does render a color it stays that color even if value changes toa lower value
                     if(cityUv<2){
-                        selectedCityUv.setAttribute("style", "background: lightgreen")
+                        selectedCityUv.setAttribute("style", "background: green")
                     } else if (cityUv >= 3 && cityUv < 5){
                         selectedCityUv.setAttribute("style", "background: yellow");
                     } else if (cityUv >= 5 && cityUv < 11) {
@@ -119,6 +139,7 @@ const cityWeatherApi = function(cityTrigger){
         });
     
         //------------------5 day forcast--------------------------
+        //specify query toooooo much data
     const city5Day = "https://api.openweathermap.org/data/2.5/forecast?q=" + cityTrigger + "&appid=508f9f1ec1873e44a9f17ab4f5c43087"
     fetch(city5Day)
         .then(function(responce){
@@ -128,63 +149,53 @@ const cityWeatherApi = function(cityTrigger){
             // console.log(data)
             const city5Day = data.list;
 
+            const city5DayPDateClass = document.querySelectorAll(".fiveDayDate")
+            const city5DayPSunClass = document.querySelectorAll(".fiveDaySun")
+            const city5DayPTempClass = document.querySelectorAll(".fiveDayTemp")
+            const city5DayPHumidClass = document.querySelectorAll(".fiveDayHumid")
+
+            let city5DayIndex = 0;
+
             console.log(city5Day.length)
             for (let i = 0; i < city5Day.length ; i++) {
                 cityDays = city5Day[i];
 
                 if(moment.unix(cityDays.dt).format("HH")==="13"){
                     console.log(moment.unix(cityDays.dt));
-                    console.log(cityDays.main.temp)
-                    city5DayDiv = document.createElement("div");
-                    city5DayPDate = document.createElement("p");
-                    city5DayPSun = document.createElement("p");
-                    city5DayPTemp = document.createElement("p");
-                    city5DayPHumid = document.createElement("p");
-
-                    city5DayDiv.setAttribute("class", "fiveDayCard");
-                    city5DayPDate.setAttribute("class", "fiveDayDate");
-                    city5DayPSun.setAttribute("class", "fiveDaySun");
-                    city5DayPTemp.setAttribute("class", "fiveDayTemp");
-                    city5DayPHumid.setAttribute("class", "fiveDayHumid");
-
-                    fiveDayWrap.appendChild(city5DayDiv);
-                    city5DayDiv.appendChild(city5DayPDate);
-                    city5DayDiv.appendChild(city5DayPSun);
-                    city5DayDiv.appendChild(city5DayPTemp);
-                    city5DayDiv.appendChild(city5DayPHumid);
+                    console.log(cityDays.main.temp);
+                    console.log(city5DayIndex);
                     
-                    
-                    //need to prevent the new elements being created
-                    //appendCount makes the line below "rain" become undefined
-                    // console.log(cityDays.weather[0].main);
+                    //because city5Day is a list of 40 things 
+              
+                    // need to prevent the new elements being created
+                    // appendCount makes the line below "rain" become undefined
+                    console.log(cityDays.weather[0].main);
+                    // could cheat it and make elements HTML and just change values
                     if (cityDays.weather[0].main==="Clear"){
-                        city5DayPSun.textContent = String.fromCodePoint(0x1F31E)
+                        city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x1F31E)
                     } else if(cityDays.weather[0].main==="Thunderstorm"){
-                        city5DayPSun.textContent = String.fromCodePoint(0x1F329)
+                        city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x1F329)
                     } else if (cityDays.weather[0].main==="Drizzle"){
-                        city5DayPSun.textContent = String.fromCodePoint(0x1F328)
+                        city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x1F328)
                     } else if (cityDays.weather[0].main==="Rain"){
-                        city5DayPSun.textContent = String.fromCodePoint(0x1F327)
+                        city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x1F327)
                     } else if (cityDays.weather[0].main==="Snow"){
-                        city5DayPSun.textContent = String.fromCodePoint(0x2747)
+                        city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x2747)
                     } else if (cityDays.weather[0].main==="Clouds"){
-                        city5DayPSun.textContent = String.fromCodePoint(0x1F325)
+                        city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x1F325)
                     } else {
-                        city5DayPSun.textContent = String.fromCodePoint(0x1F937)
+                        city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x1F937)
                     }
-                    // console.log(moment.unix(cityDays.dt));
-                    //why is it not printing dates right?
-                    city5DayPDate.textContent = moment.unix(cityDays.dt).format("MM/DD/YYYY");
-                    city5DayPTemp.textContent = "Temp: " + kToF(cityDays.main.temp);
-                    city5DayPHumid.textContent = "Humidity: " + cityDays.main.humidity;
                     
-                    //need to prevent adding elements need to replace values in existing
+                    city5DayPDateClass[city5DayIndex].textContent = moment.unix(cityDays.dt).format("MM/DD/YYYY");
+                    city5DayPTempClass[city5DayIndex].textContent = "Temp: " + kToF(cityDays.main.temp);
+                    city5DayPHumidClass[city5DayIndex].textContent = "Humidity: " + cityDays.main.humidity;
                     
+                    city5DayIndex++;
                 }
             }   
-
         })
-    
+
 }
 
 
@@ -194,8 +205,11 @@ searchSidebar.addEventListener("click", function(event){
         if(citySearch.value===""){
             return
         }
+        if(appendCount===0){
+            render5Day()
+        }
         cityWeatherApi(citySearch.value);
-        // appendCount++;
+        appendCount = 1;
 
     } else if (event.target.matches(".cityLi")) {
         cityWeatherApi(event.target.textContent);
@@ -205,16 +219,13 @@ searchSidebar.addEventListener("click", function(event){
 
 
 /* TODO
--five day weather
-    --append
-    --style
-    --data
-    
+
 -deal with spaces in search input
 
 -localeStorage
 
--use the names on the aside li to call the populate function
+-stop multiple 5 days
 
--conditionals for weather emogis
+-stop repeat citys under search
+
 */
