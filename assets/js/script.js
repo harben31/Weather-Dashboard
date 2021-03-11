@@ -1,11 +1,3 @@
-//kinda BONUS
-//prevent printin of bad searches
-
-//BONUS
-//make a cloudy and partially cloudy destinction
-//limit how many tags are allowed under the search
-//
-
 const citySearch = document.querySelector("#citySearch");
 
 const searchBtn = document.querySelector("#buttonSearch");
@@ -28,19 +20,6 @@ let city5DayPDate;
 let city5DayPSun;
 let city5DayPTemp;
 let city5DayPHumid;
-
-const renderStorage = function(){
-    if (localStorage.length !== 0){
-        for (let i = 0; i < localStorage.length; i++) {
-            const newLi = document.createElement("li");
-            newLi.setAttribute("class", "cityLi");
-            cityLi = document.querySelector(".cityLi");
-            newLi.textContent = localStorage.getItem("city" + i);
-            citiesUl.appendChild(newLi);
-        }
-    }
-}
-renderStorage();
 
 const render5Day = function(){
 for (let i = 0; i < 5; i++) {
@@ -71,18 +50,16 @@ const cityWeatherApi = function(cityTrigger){
         .then(function(response){
             if(response.status===404){
                 alert("not a valid city");
-                console.log("returned");
-                return
-            } else {
-                
-            }
+            } 
             return response.json();
         })
-        //bad search------------
         .then(function(data){
-            if(data===undefined){
-                return
+
+            if(storageArray.indexOf(data.name)===-1){
+                storageGet(data.name);
             }
+
+            storageArrayFn(data);
 
             selectedCityName.innerHTML = data.name + " " + moment.unix(data.dt).format("MM/DD/YYYY") + " <span id='sunSpot'> </span>";
             
@@ -104,13 +81,11 @@ const cityWeatherApi = function(cityTrigger){
                 sunSpot.textContent =  String.fromCodePoint(0x1F937)
             }
             
-            
             selectedCityTemp.innerHTML = "Temperature: " + data.main.temp + "° Farenheit";
             selectedCityHumid.textContent = "Humidity: " + data.main.humidity + "% Humidity";
             selectedCityWind.textContent = "Wind Speed: " + data.wind.speed + " mph";
 
-
-            // -------------------UV functionality-----------------------
+            // -------------------UV functionality-----------------------`
             const cityUvUrl = "https://api.openweathermap.org/data/2.5/uvi?lat=" + data.coord.lat + "&lon=" + data.coord.lon+ "&appid=508f9f1ec1873e44a9f17ab4f5c43087"
 
             fetch(cityUvUrl)
@@ -135,15 +110,13 @@ const cityWeatherApi = function(cityTrigger){
 
         });
     
-        //------------------5 day forcast--------------------------
-        //specify query toooooo much data
-    const city5Day = "https://api.openweathermap.org/data/2.5/forecast?q=" + cityTrigger + "&units=imperial&appid=508f9f1ec1873e44a9f17ab4f5c43087"
-    fetch(city5Day)
+        //------------------5 day forcast-------------------------- 
+    const city5DayCall = "https://api.openweathermap.org/data/2.5/forecast?q=" + cityTrigger + "&units=imperial&appid=508f9f1ec1873e44a9f17ab4f5c43087"
+    fetch(city5DayCall)
         .then(function(responce){
             return responce.json();
         })
         .then(function(data){
-            // console.log(data)
             const city5Day = data.list;
 
             const city5DayPDateClass = document.querySelectorAll(".fiveDayDate")
@@ -153,15 +126,10 @@ const cityWeatherApi = function(cityTrigger){
 
             let city5DayIndex = 0;
 
-            console.log(city5Day.length)
             for (let i = 0; i < city5Day.length ; i++) {
                 cityDays = city5Day[i];
-
-                if(moment.unix(cityDays.dt).format("HH")==="13"){
-                    // console.log(moment.unix(cityDays.dt));
-                    // console.log(cityDays.main.temp);
-                    // console.log(city5DayIndex);
-                    // console.log(cityDays.weather[0].main);
+                
+                if(moment.unix(cityDays.dt).format("HH")==="13"|| moment.unix(cityDays.dt).format("HH")==="14"){
 
                     if (cityDays.weather[0].main==="Clear"){
                         city5DayPSunClass[city5DayIndex].textContent = String.fromCodePoint(0x1F31E)
@@ -182,7 +150,7 @@ const cityWeatherApi = function(cityTrigger){
                     city5DayPDateClass[city5DayIndex].textContent = moment.unix(cityDays.dt).format("MM/DD/YYYY");
                     city5DayPTempClass[city5DayIndex].textContent = "Temp: " + cityDays.main.temp;
                     city5DayPHumidClass[city5DayIndex].textContent = "Humidity: " + cityDays.main.humidity;
-                    
+
                     city5DayIndex++;
                 }
             }   
@@ -190,52 +158,23 @@ const cityWeatherApi = function(cityTrigger){
 
 }
 
-//-------------saving to localstorage---------
-//good place for this function?
-let cityStorageIndex = 0;
-let saveSwitch = 0;
+//-----------getting&setting local storage----------------
+let storageArray = JSON.parse(localStorage.getItem("storageArray"))||[];
 
-console.log(localStorage.key(0))
-const save2Storage = function(){
-    if(localStorage.length===0){
-        console.log("storage empty")
-        localStorage.setItem("city" + cityStorageIndex, citySearch.value.trim("").replaceAll(" ", "+").toLowerCase());
-        let newLi = document.createElement("li");
-        newLi.setAttribute("class", "cityLi");
-        cityLi = document.querySelector(".cityLi");
-        newLi.textContent = citySearch.value.trim("").toLowerCase();
-        citiesUl.appendChild(newLi);
-        cityStorageIndex++;
+let storageGet = function(name){
+    const button = document.createElement("li");
+    button.textContent = name.replaceAll("+", " ");
+    button.setAttribute("class", "cityLi");
+    citiesUl.appendChild(button);
+}
+
+const storageArrayFn = function(data){
+    if(storageArray.indexOf(data.name) !== -1){
         return;
-    };
-    
-    if (localStorage.length !== 0){
-        //----------prevents duplicate city tags from printing-------
-        cityStorageIndex = localStorage.length;
-        for (let i = 0; i < localStorage.length; i++) {
-            let key = localStorage.key(i);
-            // console.log(key);
-            let value = localStorage.getItem(key);
-            // console.log(value)
-            if(value===citySearch.value.trim("").replaceAll(" ", "+").toLowerCase()){
-                // console.log("match" + value);
-                saveSwitch = 1;
-            } 
-        }
-        if (saveSwitch===1){
-            console.log("switch " +  saveSwitch);
-            saveSwitch = 0;
-            return
-        } else {
-            console.log("switch else")
-            localStorage.setItem("city" + cityStorageIndex, citySearch.value.trim("").replaceAll(" ", "+").toLowerCase())
-            const newLi = document.createElement("li");
-            newLi.setAttribute("class", "cityLi");
-            cityLi = document.querySelector(".cityLi");
-            newLi.textContent = citySearch.value.trim("").toLowerCase();
-            citiesUl.appendChild(newLi);
-            saveSwitch = 0;
-        }
+    }
+    if(data.cod===200){
+        storageArray.push(data.name);
+        localStorage.setItem("storageArray", JSON.stringify(storageArray));
     }
 }
 
@@ -245,7 +184,6 @@ searchSidebar.addEventListener("click", function(event){
     event.preventDefault();
     const citySearchClean = citySearch.value.trim("").replaceAll(" ", "+").toLowerCase();
     if(event.target.matches("#buttonSearch")){
-        // console.log(citySearchClean);
         if(citySearchClean===""){
             return
         };
@@ -253,7 +191,6 @@ searchSidebar.addEventListener("click", function(event){
             render5Day()
         };
         cityWeatherApi(citySearchClean);
-        save2Storage();
         citySearch.value = "";
         
         appendCount = 1;
@@ -261,9 +198,15 @@ searchSidebar.addEventListener("click", function(event){
 //-----------------saved city li buttons-------------
     } else if (event.target.matches(".cityLi")) {
         cityWeatherApi(event.target.textContent);
+
         if(appendCount===0){
             render5Day()
         };
+
         appendCount = 1;
     }
 });
+
+for (let i = 0; i < storageArray.length; i++) {
+    storageGet(storageArray[i]);  
+}
