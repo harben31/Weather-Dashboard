@@ -6,3 +6,4 @@ This application will give a current and a 5 day forcast of the weather in a giv
 
 [Deployed website](https://harben31.github.io/bbh_homework_wk_6/)
 
+![video screenshot](./assets/images/travelWeather.gif)
