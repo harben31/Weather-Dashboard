@@ -9,6 +9,8 @@ Contact:
 * Email: [harben31@gmail.com](mailto:harben31@gmail.com)
 * Portfolio: [harben31.github.io/Benjamins-Portfolio/](https://harben31.github.io/Benjamins-Portfolio/)
 
+License: MIT
+
 [Deployed website](https://harben31.github.io/bbh_homework_wk_6/)
 
 ![video screenshot](./assets/images/travelWeather.gif)
